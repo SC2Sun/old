@@ -1,0 +1,106 @@
+<template>
+  <div class="container">
+    <div style="width: 400px; padding: 30px; background-color: white; border-radius: 5px;">
+      <div style="text-align: center; font-size: 20px; margin-bottom: 20px; color: #333">社区养老系统 欢迎使用</div>
+      <el-form :model="form" :rules="rules" ref="formRef">
+        <el-form-item prop="username">
+          <el-input prefix-icon="el-icon-user" placeholder="请输入账号" v-model="form.username"></el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input prefix-icon="el-icon-lock" placeholder="请输入密码" show-password  v-model="form.password"></el-input>
+        </el-form-item>
+        <el-form-item prop="role">
+          <el-select style="width: 100%" v-model="form.role">
+            <el-option value="ADMIN" label="管理员"></el-option>
+            <el-option value="USER" label="普通用户"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="width: 100%; background-color: #333; border-color: #333; color: white" @click="login">登 录</el-button>
+        </el-form-item>
+       <div style="display: flex; align-items: center">
+          <div style="flex: 1"></div>
+          <div style="flex: 1; text-align: right">
+            还没有账号？请 <a href="/register">注册</a>
+        </div>
+       </div>
+      </el-form>
+    </div>
+    <el-dialog title="公告" :visible.sync="dialogVisible" :show-close="false" width="40%" :close-on-click-modal="false" destroy-on-close>
+      <div style="font-size: 16px; line-height: 26px; margin-bottom: 20px; text-align: justify">
+        本项目为<b style="color: #000">NAU毕业设计</b>
+      </div>
+  <div>
+        <b style="font-size: 16px;color: #ff2424">欢迎大家观看实测该养老社区系统，感谢老师指导。</b>
+      </div>
+      <div style="margin-top: 5px; font-size: 16px"></div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogVisible=false">开始使用</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Login",
+  data() {
+    return {
+      dialogVisible: true,
+      form: { role: 'ADMIN' },
+      rules: {
+        username: [
+          { required: true, message: '请输入账号', trigger: 'blur' },
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+        ]
+      }
+    }
+  },
+  created() {
+
+  },
+  methods: {
+    login() {
+      this.$refs['formRef'].validate((valid) => {
+        if (valid) {
+          // 验证通过
+          this.$request.post('/login', this.form).then(res => {
+            if (res.code === '200') {
+              localStorage.setItem("xm-user", JSON.stringify(res.data))  // 存储用户数据
+              this.$message.success('登录成功')
+              setTimeout(() => {
+                if (res.data.role === 'ADMIN') {
+                  location.href = '/home'
+                }
+                else {
+                  location.href = '/front/home'
+                }
+              }, 500)
+            } else {
+              this.$message.error(res.msg)
+            }
+          })
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+.container {
+  height: 100vh;
+  overflow: hidden;
+  background-image: url("@/assets/imgs/bg.png");
+  background-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+a {
+  color: #2a60c9;
+}
+</style>
